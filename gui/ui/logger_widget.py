@@ -5,7 +5,7 @@ Logger Widget Module
 Provides UI components for data logging and visualization.
 """
 
-from PyQt6 import QtWidgets, QtCore
+from PyQt6 import QtWidgets, QtCore, QtGui
 from typing import List, Callable, Optional
 
 from gui.ui.focus_manager import FocusManager
@@ -57,6 +57,9 @@ class CSVLoggerWidget(QtWidgets.QGroupBox):
         
         # Start with a gray border for the group box
         self.setStyleSheet("QGroupBox { border: 2px solid gray; }")
+        
+        # Enable drop functionality
+        self.setAcceptDrops(True)
     
     def mousePressEvent(self, event) -> None:
         """Handle mouse press events to set focus."""
@@ -137,6 +140,20 @@ class CSVLoggerWidget(QtWidgets.QGroupBox):
         """Load a CSV log file into the data manager."""
         success = self.data_manager.load_log_file()
         # The data manager handles showing dialog messages
+
+    def dragEnterEvent(self, event) -> None:
+        """Handle drag enter event for drag and drop."""
+        # Accept drag events that have the right format
+        if event.mimeData().hasText():
+            event.acceptProposedAction()
+            
+    def dropEvent(self, event) -> None:
+        """Handle drop event for drag and drop."""
+        # Process dropped text
+        signal_key = event.mimeData().text()
+        if signal_key:
+            # Always add the signal to the logger list
+            self.add_signal(signal_key)
 
 
 class TerminalLogWidget(QtWidgets.QWidget):

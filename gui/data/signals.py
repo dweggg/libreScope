@@ -8,7 +8,7 @@ Manages signal definitions, metadata, and provides a list widget for signal sele
 import json
 from pathlib import Path
 from typing import Dict, Any, Optional
-from PyQt6 import QtWidgets, QtCore
+from PyQt6 import QtWidgets, QtCore, QtGui
 
 class SignalDefinitions:
     """Manages signal definitions and metadata."""
@@ -98,3 +98,25 @@ class SignalsList(QtWidgets.QListWidget):
             item.setData(QtCore.Qt.ItemDataRole.UserRole, signal)  # Store signal key as metadata
             item.setFlags(item.flags() | QtCore.Qt.ItemFlag.ItemIsDragEnabled)
             self.addItem(item)
+    
+    def startDrag(self, supportedActions):
+        """Override startDrag to customize drag behavior."""
+        if self.currentItem() is None:
+            return
+            
+        drag = QtGui.QDrag(self)
+        mime_data = QtCore.QMimeData()
+        
+        # Get the signal key (not the display name)
+        signal_key = self.currentItem().data(QtCore.Qt.ItemDataRole.UserRole)
+        mime_data.setText(signal_key)
+        
+        drag.setMimeData(mime_data)
+        
+        # Set a transparent pixmap for cleaner drag experience
+        pixmap = QtGui.QPixmap(1, 1)
+        pixmap.fill(QtCore.Qt.GlobalColor.transparent)
+        drag.setPixmap(pixmap)
+        
+        # Execute the drag
+        drag.exec(supportedActions)
