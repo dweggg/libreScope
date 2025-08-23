@@ -2,13 +2,15 @@
 Communication Module
 =================
 
-Manages communication protocols for serial data.
+Exports the abstract protocol interface and the manager only. No built-ins.
 """
 
 from gui.communication.comm_manager import (
     CommunicationProtocol,
-    SerialProtocol,
-    CommunicationManager
+    CommunicationManager,
 )
 
-__all__ = ['CommunicationProtocol', 'SerialProtocol', 'CommunicationManager']
+__all__ = [
+    'CommunicationProtocol',
+    'CommunicationManager',
+]

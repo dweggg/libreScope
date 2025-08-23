@@ -1,8 +1,8 @@
 """
-Serial Data Logger
-==============================
+libreScope GUI
+==============
 
-A generic serial data visualization and logging tool.
+Protocol-agnostic visualization and logging shell.
 """
 
 __version__ = '1.0.0'

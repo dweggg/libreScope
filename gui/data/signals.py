@@ -2,7 +2,7 @@
 Signals Module
 =============
 
-Manages signal definitions, metadata, and provides a list widget for signal selection.
+Barebones signals provider hook and a list widget. No built-in definitions.
 """
 
 import json
@@ -10,72 +10,51 @@ from pathlib import Path
 from typing import Dict, Any, Optional
 from PyQt6 import QtWidgets, QtCore, QtGui
 
+_GLOBAL_SIGNALS_PROVIDER = None
+
+
+def set_signals_provider(provider):
+    """Set a global signals provider used by helper functions and UI widgets."""
+    global _GLOBAL_SIGNALS_PROVIDER
+    _GLOBAL_SIGNALS_PROVIDER = provider
+
+
+def get_signal_direction(signal_key: str) -> Optional[str]:
+    """Global helper routing to the installed signals provider."""
+    if _GLOBAL_SIGNALS_PROVIDER is None:
+        return None
+    try:
+        return _GLOBAL_SIGNALS_PROVIDER.get_signal_direction(signal_key)
+    except Exception:
+        return None
+
+
+def get_signal_name(signal_key: str) -> str:
+    """Global helper routing to the installed signals provider."""
+    if _GLOBAL_SIGNALS_PROVIDER is None:
+        return signal_key
+    try:
+        return _GLOBAL_SIGNALS_PROVIDER.get_signal_name(signal_key)
+    except Exception:
+        return signal_key
+
+
 class SignalDefinitions:
-    """Manages signal definitions and metadata."""
-    
+    """Deprecated JSON-backed definitions removed; kept for compatibility."""
     def __init__(self, database_file: str):
-        """
-        Initialize signal definitions from a database file.
-        
-        Args:
-            database_file: Path to the JSON database file with signal definitions
-        """
-        self.database_file = Path(database_file)
         self.signal_dict: Dict[str, Dict[str, str]] = {}
-        self.load_signal_keys()
-    
-    def load_signal_keys(self) -> None:
-        """Load signal keys from the JSON configuration file."""
-        try:
-            with open(self.database_file, 'r') as file:
-                config = json.load(file)
-                # Convert to a dictionary where key = signal key, and value = {dir, name}
-                self.signal_dict = {
-                    signal["key"]: {"dir": signal["dir"], "name": signal["name"]}
-                    for signal in config.get("signal_keys", [])
-                }
-        except (FileNotFoundError, json.JSONDecodeError) as e:
-            print(f"Error loading signal database: {e}")
-            self.signal_dict = {}
-    
     def get_signal_direction(self, signal_key: str) -> Optional[str]:
-        """
-        Returns the direction (RX or TX) for the given signal key.
-        
-        Args:
-            signal_key: The signal identifier
-            
-        Returns:
-            Direction string or None if signal not found
-        """
-        return self.signal_dict.get(signal_key, {}).get("dir")
-    
+        return None
     def get_signal_name(self, signal_key: str) -> str:
-        """
-        Returns the human-readable name for the given signal key.
-        
-        Args:
-            signal_key: The signal identifier
-            
-        Returns:
-            Human-readable name or the key itself if not found
-        """
-        return self.signal_dict.get(signal_key, {}).get("name", signal_key)
-    
+        return signal_key
     def get_all_keys(self) -> Dict[str, Dict[str, str]]:
-        """
-        Returns all signal keys and their metadata.
-        
-        Returns:
-            Dictionary of signal keys and their metadata
-        """
-        return self.signal_dict
+        return {}
 
 
 class SignalsList(QtWidgets.QListWidget):
     """Widget that displays a draggable list of available signals."""
     
-    def __init__(self, signal_definitions: SignalDefinitions, parent=None):
+    def __init__(self, signal_definitions: SignalDefinitions | None, parent=None):
         """
         Initialize the signals list widget.
         
@@ -92,7 +71,13 @@ class SignalsList(QtWidgets.QListWidget):
     def populate_list(self) -> None:
         """Populate the list with signal names from the definitions."""
         self.clear()
-        for signal, info in self.signal_definitions.get_all_keys().items():
+        signals = {}
+        if _GLOBAL_SIGNALS_PROVIDER is not None:
+            try:
+                signals = _GLOBAL_SIGNALS_PROVIDER.get_all_keys()
+            except Exception:
+                signals = {}
+        for signal, info in signals.items():
             item_text = f"{info['name']}"  # Show human-readable name
             item = QtWidgets.QListWidgetItem(item_text)
             item.setData(QtCore.Qt.ItemDataRole.UserRole, signal)  # Store signal key as metadata

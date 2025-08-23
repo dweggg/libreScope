@@ -358,17 +358,13 @@ class Plot(QtWidgets.QGroupBox):
                 brush=pg.mkBrush('r')
             )
             self.plot_widget.addItem(self.xy_marker)
-            
+
         self.xy_marker.setData([x_vals[-1]], [y_vals[-1]])
-        
-        try:
-            from gui.data.signals import get_signal_name
-            x_name = get_signal_name(x_signal)
-            y_name = get_signal_name(y_signal)
-        except ImportError:
-            x_name = x_signal
-            y_name = y_signal
-            
+
+        from gui.data.signals import get_signal_name
+        x_name = get_signal_name(x_signal)
+        y_name = get_signal_name(y_signal)
+
         self.plot_widget.setLabel('bottom', x_name)
         self.plot_widget.setLabel('left', y_name)
             
@@ -383,12 +379,8 @@ class Plot(QtWidgets.QGroupBox):
             if signal in data_history and data_history[signal]:
                 value = data_history[signal][-1][0]
             
-            try:
-                from gui.data.signals import get_signal_direction
-                direction = get_signal_direction(signal)
-            except ImportError:
-                # Default direction if can't import
-                direction = 'RX'
+            from gui.data.signals import get_signal_direction
+            direction = get_signal_direction(signal) or 'RX'
                 
             if direction == 'TX':
                 current_value = self.last_tx_values.get(signal, value)
@@ -431,11 +423,8 @@ class Plot(QtWidgets.QGroupBox):
                         else:
                             break
                     
-                    try:
-                        from gui.data.signals import get_signal_name
-                        signal_name = get_signal_name(signal)
-                    except ImportError:
-                        signal_name = signal
+                    from gui.data.signals import get_signal_name
+                    signal_name = get_signal_name(signal)
                         
                     label = f"{signal_name} ({count} Hz)"
                     self.legend.addItem(self.signal_curves[signal], label)
@@ -443,11 +432,8 @@ class Plot(QtWidgets.QGroupBox):
             # In other modes, simply display the signal name
             for signal in self.signal_keys_assigned:
                 if signal in self.signal_curves:
-                    try:
-                        from gui.data.signals import get_signal_name
-                        signal_name = get_signal_name(signal)
-                    except ImportError:
-                        signal_name = signal
+                    from gui.data.signals import get_signal_name
+                    signal_name = get_signal_name(signal)
                         
                     self.legend.addItem(self.signal_curves[signal], signal_name)
     

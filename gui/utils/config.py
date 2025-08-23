@@ -26,7 +26,7 @@ configure_platform_settings()
 # --- Default File Paths ---
 ROOT_DIR = Path(__file__).parent.parent.parent
 RESOURCES_DIR = ROOT_DIR
-DATABASE_FILE = ROOT_DIR / 'database.json'
+DATABASE_FILE = ROOT_DIR / 'database.json'  # kept for backward compatibility
 DEFAULT_LAYOUT_FILE = ROOT_DIR / 'default_layout.json'
 
 # --- Communication Settings ---
@@ -53,7 +53,7 @@ def load_config(config_file=None):
         'update_interval_ms': UPDATE_INTERVAL_MS,
         'plot_update_interval_ms': PLOT_UPDATE_INTERVAL_MS,
         'max_points': MAX_POINTS,
-        'database_file': str(DATABASE_FILE),
+    'database_file': str(DATABASE_FILE),  # unused by core, available for user providers
         'default_layout_file': str(DEFAULT_LAYOUT_FILE)
     }
     
